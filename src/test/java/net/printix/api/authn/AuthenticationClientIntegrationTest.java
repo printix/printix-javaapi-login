@@ -17,9 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -35,8 +33,7 @@ import net.printix.api.authn.exception.InvalidCredentialsException;
 public class AuthenticationClientIntegrationTest {
 
 	@Configuration
-	@ComponentScan
-	@EnableConfigurationProperties
+	@EnablePrintixAuthenticationClient
 	public static class TestConfig {
 	}
 
