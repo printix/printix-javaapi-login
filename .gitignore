@@ -7,5 +7,5 @@
 /gradle
 local.properties
 /.gradle
-/.idea
+/.idea/
 .idea/modules/printix-javalib.iml
