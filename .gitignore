@@ -9,3 +9,4 @@ local.properties
 /.gradle
 /.idea/
 .idea/modules/printix-javalib.iml
+build/
