@@ -2,14 +2,11 @@ package net.printix.api.authn.config;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author peter
  */
-@Component
 public class OAuthConfig {
 
 
@@ -25,25 +22,25 @@ public class OAuthConfig {
 	/**
 	 * Printix domain (environment) to use.
 	 */
-	@Value("${" + PRINTIX_DOMAIN_PROPERTY + ":#{null}}")
+
 	private String domain;
 
 	/**
 	 * Id of the calling application.
 	 */
-	@Value("${" + PRINTIX_OAUTH_CLIENT_ID_PROPERTY + ":#{null}}")
+
 	private String clientId;
 
-	@Value("${" + PRINTIX_OAUTH_CLIENT_SECRET_PROPERTY + ":#{null}}")
+
 	private String clientSecret;
 
-	@Value("${" + PRINTIX_OAUTH_GRANT_TYPE_PROPERTY + ":#{null}}")
+
 	private String grantType;
 
-	@Value("${" + PRINTIX_OAUTH_SIGNIN_URI_SECRET_PROPERTY + ":#{null}}")
+
 	private String signinUri;
 
-	@Value("${" + PRINTIX_OAUTH_REDIRECT_URI_PROPERTY + ":#{null}}")
+
 	private String redirectUri;
 
 

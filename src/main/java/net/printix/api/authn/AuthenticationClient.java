@@ -36,18 +36,18 @@ import net.printix.api.authn.exception.InvalidCredentialsException;
  * 
  * @author peter
  */
-@Service
+
 public class AuthenticationClient {
 
 	
-	@Autowired
+
 	private OAuthConfig oAuthConfig;
 	
-	@Value("${printix.domain:printix.net}")
+
 	private String printixDomain;
 
 	
-	private final RestTemplate restTemplate;
+
 
 
 	/**

@@ -1,10 +1,7 @@
 package net.printix.api.authn.dto.internal;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+
+import org.apache.http.HttpHeaders;
 
 /**
  *

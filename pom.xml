@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>net.printix.javaapi.login</groupId>
-	<artifactId>printix-javaapi-login</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>net.printix</groupId>
+	<artifactId>printix-javalib</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
 
-	<name>Printix Java API - Login</name>
-	<description>Java API for programmatic login to Printrix without user interaction.</description>
+	<name>Printix API</name>
+	<description>Java API for programmatic to the printix api. This version does not depend on any spring libraries.</description>
 
 
 	<properties>
