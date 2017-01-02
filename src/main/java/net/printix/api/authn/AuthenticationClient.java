@@ -51,8 +51,8 @@ public class AuthenticationClient {
 
 
 	/**
-	 * The default http client thats loaded with a resttemplate, follows redirect from GET requests,
-	 * with no way of intercepting the URI redirected to.
+	 * The default http client that's loaded with a rest template, follows redirect from
+	 * GET requests with no way of intercepting the URI redirected to.
 	 * Since not all of these redirects are valid, and some of them contain info we need.
 	 * We just disable any redirects
 	 */
