@@ -10,3 +10,4 @@ local.properties
 /.idea/
 .idea/modules/printix-javalib.iml
 build/
+src/test/resources/application.properties
