@@ -1,6 +1,4 @@
-package net.printix.api.authn.client;
-
-import net.printix.api.authn.dto.internal.Jwt;
+package net.printix.api.client.login.oauth;
 
 import okhttp3.HttpUrl;
 
@@ -10,12 +8,12 @@ import okhttp3.HttpUrl;
 
 public class UsernamePasswordResponse {
     private final HttpUrl httpUrl;
-    private final Jwt jwt;
+    private final JWT jwt;
     private final Boolean requiresMfa;
 
     public UsernamePasswordResponse(String uri) {
         this.httpUrl = HttpUrl.parse(uri);
-        this.jwt = Jwt.fromLocation(httpUrl.uri()).orElseThrow(() -> new IllegalArgumentException("Invalid Username password response URI, "+ uri.toString()+ " should contain a JWT"));
+        this.jwt = JWT.fromLocation(httpUrl).orElseThrow(() -> new IllegalArgumentException("Invalid Username password response URI, "+ uri.toString()+ " should contain a JWT"));
         this.requiresMfa = uri.toString().contains("oneTimePassword=true");
     }
 
@@ -24,7 +22,7 @@ public class UsernamePasswordResponse {
         return httpUrl;
     }
 
-    public Jwt getJwt() {
+    public JWT getJwt() {
         return jwt;
     }
 

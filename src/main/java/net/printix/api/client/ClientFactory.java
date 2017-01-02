@@ -1,4 +1,7 @@
-package net.printix.api.authn.client;
+package net.printix.api.client;
+
+import net.printix.api.client.login.oauth.LoginClient;
+import net.printix.api.client.login.oauth.TokenAuthClient;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;

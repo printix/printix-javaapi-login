@@ -1,4 +1,4 @@
-package net.printix.api.authn.exception;
+package net.printix.api.exceptions;
 
 /**
  *

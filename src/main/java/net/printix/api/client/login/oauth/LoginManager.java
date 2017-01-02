@@ -1,13 +1,7 @@
-package net.printix.api.authn.client;
+package net.printix.api.client.login.oauth;
 
-import net.printix.api.authn.client.oauth.ClientId;
-import net.printix.api.authn.client.oauth.ClientSecret;
-import net.printix.api.authn.client.oauth.GrantType;
-import net.printix.api.authn.client.oauth.OauthCode;
-import net.printix.api.authn.client.oauth.Password;
-import net.printix.api.authn.client.oauth.RedirectUri;
-import net.printix.api.authn.client.oauth.TenantName;
-import net.printix.api.authn.client.oauth.Username;
+import net.printix.api.client.ClientFactory;
+import net.printix.api.dto.OAuthToken;
 
 import java.io.IOException;
 
@@ -33,7 +27,7 @@ public class LoginManager {
 
         Response<ResponseBody> execute = tokenAuthClient.initiate(tenantName,"code", "web_app", "thehouseisonfire", https).execute();
 
-        InitialJwtResponse jwt = new InitialJwtResponse(execute.raw().request().url());
+        JWT jwt = new JWT(execute.raw().request().url());
 
         Response<ResponseBody> execute1 = clientFactory.getLoginClient().login(username, password, jwt.getJwt()).execute();
 

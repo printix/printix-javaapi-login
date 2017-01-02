@@ -1,4 +1,4 @@
-package net.printix.api.authn.client.oauth;
+package net.printix.api.client.login.oauth;
 
 /**
  * Created by peter on 31-12-16.

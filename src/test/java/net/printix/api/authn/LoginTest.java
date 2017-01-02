@@ -1,10 +1,10 @@
 package net.printix.api.authn;
 
-import net.printix.api.authn.client.LoginManager;
-import net.printix.api.authn.client.OAuthToken;
-import net.printix.api.authn.client.oauth.Password;
-import net.printix.api.authn.client.oauth.TenantName;
-import net.printix.api.authn.client.oauth.Username;
+import net.printix.api.client.login.oauth.LoginManager;
+import net.printix.api.dto.OAuthToken;
+import net.printix.api.client.login.oauth.Password;
+import net.printix.api.client.login.oauth.TenantName;
+import net.printix.api.client.login.oauth.Username;
 
 import org.junit.Test;
 

@@ -1,7 +1,4 @@
-package net.printix.api.authn.client;
-
-import net.printix.api.authn.client.oauth.RedirectUri;
-import net.printix.api.authn.client.oauth.TenantName;
+package net.printix.api.client.login.oauth;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

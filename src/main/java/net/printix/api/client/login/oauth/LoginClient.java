@@ -1,12 +1,6 @@
-package net.printix.api.authn.client;
+package net.printix.api.client.login.oauth;
 
-import net.printix.api.authn.client.oauth.ClientId;
-import net.printix.api.authn.client.oauth.ClientSecret;
-import net.printix.api.authn.client.oauth.GrantType;
-import net.printix.api.authn.client.oauth.OauthCode;
-import net.printix.api.authn.client.oauth.Password;
-import net.printix.api.authn.client.oauth.RedirectUri;
-import net.printix.api.authn.client.oauth.Username;
+import net.printix.api.dto.OAuthToken;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

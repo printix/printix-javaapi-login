@@ -1,4 +1,4 @@
-package net.printix.api.authn.dto.internal;
+package net.printix.api.client.login.oauth;
 
 
 /**
