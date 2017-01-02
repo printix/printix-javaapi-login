@@ -1,3 +1,4 @@
+//these properties must be supplied in a file called appliation.properties, for the tests to run
 username=
 password=
 tenantname=
