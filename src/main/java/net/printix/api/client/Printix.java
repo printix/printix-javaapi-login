@@ -1,11 +1,13 @@
 package net.printix.api.client;
 
+import net.printix.api.client.internal.PrinterClient;
 import net.printix.api.dto.OAuthToken;
-import net.printix.api.dto.Printer;
+import net.printix.api.dto.PrinterList;
 import net.printix.api.dto.TenantId;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+
+import retrofit2.Response;
 
 /**
  * Created by peter on 02-01-17.
@@ -13,15 +15,16 @@ import java.util.List;
 
 public class Printix {
 
-    private final OAuthToken oAuthToken;
 
-    public Printix(OAuthToken oAuthToken) {
-        this.oAuthToken = oAuthToken;
+    private final PrinterClient printerClient;
+
+    public Printix(PrinterClient printerClient) {
+        this.printerClient = printerClient;
     }
 
 
-    public List<Printer> getPrinters(OAuthToken token, TenantId tenantId){
-        return Collections.emptyList();
+    public Response<PrinterList> getPrinters(OAuthToken token, TenantId tenantId) throws IOException {
+        return printerClient.getPrinters(token.getBearerToken(), tenantId).execute();
     }
 
 }

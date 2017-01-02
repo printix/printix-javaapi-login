@@ -1,20 +1,23 @@
 package net.printix.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 /**
  * Created by peter on 02-01-17.
  */
 
-public class HalResponse {
+public class HalResponse<T> {
 
+    @JsonProperty("links")
     private final List<Link> links;
 
-    public HalResponse(List<Link> links) {
-        this.links = links;
-    }
+    @JsonProperty("_embedded")
+    private final T embedded;
 
-    public List<Link> getLinks() {
-        return links;
+    public HalResponse(List<Link> links, T embedded) {
+        this.links = links;
+        this.embedded = embedded;
     }
 }
