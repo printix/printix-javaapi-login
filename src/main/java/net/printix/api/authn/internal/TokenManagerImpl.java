@@ -28,10 +28,6 @@ public class TokenManagerImpl implements TokenManager {
 	private OAuthTokens defaultTokens;
 
 
-	public TokenManagerImpl(TokenRefresher tokenRefresher) {
-		this.tokenRefresher = tokenRefresher;
-	}
-
 
 	@Override
 	public void setUserToken(Object user, OAuthTokens oAuthTokens) {
