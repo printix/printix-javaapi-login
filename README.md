@@ -14,3 +14,6 @@ application.
 See the unit-test and its configuration file
 [src/test/resources/application.yml](https://github.com/printix/printix-javaapi-login/blob/master/src/test/resources/application.yml)
 for a complete list of available configuration properties.
+
+
+A `TokenManager` is also provided. It can be used with the printix-javaapi-client to manage credentials for multiple users.

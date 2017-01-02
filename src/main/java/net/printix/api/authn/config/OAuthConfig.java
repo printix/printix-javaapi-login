@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- *
+ * oAuth configuration.
+ * 
  * @author peter
  */
 @Component

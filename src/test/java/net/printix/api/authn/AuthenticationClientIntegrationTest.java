@@ -12,7 +12,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import net.printix.api.authn.AuthenticationClientIntegrationTest.TestConfig;
 import net.printix.api.authn.dto.OAuthTokens;
 import net.printix.api.authn.dto.UserCredentials;
 import net.printix.api.authn.exception.InvalidCredentialsException;
+import net.printix.api.authn.internal.AuthenticationClientImpl;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = TestConfig.class)
@@ -39,15 +40,18 @@ public class AuthenticationClientIntegrationTest {
 
 
 	@Autowired
-	private AuthenticationClient authClient;
+	private AuthenticationClientImpl authClient;
 
-	
+
 	@Value("${test.auth_client.tenantHostName}")
 	private String tenantHostName;
 
 	@Value("${test.auth_client.otherTenantHostName}")
 	private String otherTenantHostName;
 
+
+	@Value("${test.auth_client.trustAnySslCert}")
+	private boolean trustAnySslCert;
 
 	@Value("${test.auth_client.adminUserName}")
 	private String adminUserName;
@@ -60,34 +64,36 @@ public class AuthenticationClientIntegrationTest {
 
 	@Value("${test.auth_client.globalAdminPassword}")
 	private String globalAdminPassword;
-	
+
 	@Value("${test.auth_client.globalAdminTotpSecret}")
 	private String globalAdminTotpSecret;
 
-	
-	@BeforeClass
-	public static void init() {
-		TrustManager[] trustAllCerts = new TrustManager[] { 
-				new X509TrustManager() {     
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-						return new X509Certificate[0];
-					} 
-					public void checkClientTrusted( 
-							java.security.cert.X509Certificate[] certs, String authType) {
-					} 
-					public void checkServerTrusted( 
-							java.security.cert.X509Certificate[] certs, String authType) {
-					}
-				} 
-		}; 
 
-		// Install the all-trusting trust manager
-		try {
-			SSLContext sc = SSLContext.getInstance("SSL"); 
-			sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (GeneralSecurityException e) {
-		} 
+	@Before
+	public void init() {
+		// Install all-trusting trust manager if running in environment using self-signed certs.
+		if (trustAnySslCert) {
+			TrustManager[] trustAllCerts = new TrustManager[] { 
+					new X509TrustManager() {     
+						public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
+							return new X509Certificate[0];
+						} 
+						public void checkClientTrusted( 
+								java.security.cert.X509Certificate[] certs, String authType) {
+						} 
+						public void checkServerTrusted( 
+								java.security.cert.X509Certificate[] certs, String authType) {
+						}
+					} 
+			}; 
+			// Install the all-trusting trust manager
+			try {
+				SSLContext sc = SSLContext.getInstance("SSL"); 
+				sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
+				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			} catch (GeneralSecurityException e) {
+			}
+		}
 	}
 
 

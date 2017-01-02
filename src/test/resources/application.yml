@@ -13,6 +13,7 @@ printix:
 # Following configuration should be supplied (overridden) to run the AuthenticationClientIntegrationTest
 test:
   auth_client:
+    trustAnySslCert: false  # Only set true if running in an environment using self-signed ssl certs (devenv)
     tenantHostName: 
     otherTenantHostName: 
     adminUserName: 

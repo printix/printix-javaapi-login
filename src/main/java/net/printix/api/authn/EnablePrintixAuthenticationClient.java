@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import net.printix.api.authn.internal.AuthenticationClientConfiguration;
+
 /**
  * Enables the Printix authentication client.
  */
