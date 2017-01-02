@@ -17,13 +17,15 @@ public class Printix {
 
 
     private final PrinterClient printerClient;
+    private final OAuthToken token;
 
-    public Printix(PrinterClient printerClient) {
+    public Printix(PrinterClient printerClient, OAuthToken token) {
         this.printerClient = printerClient;
+        this.token = token;
     }
 
 
-    public Response<PrinterList> getPrinters(OAuthToken token, TenantId tenantId) throws IOException {
+    public Response<PrinterList> getPrinters(TenantId tenantId) throws IOException {
         return printerClient.getPrinters(token.getBearerToken(), tenantId).execute();
     }
 

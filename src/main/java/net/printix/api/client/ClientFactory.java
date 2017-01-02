@@ -3,6 +3,7 @@ package net.printix.api.client;
 import net.printix.api.client.internal.PrinterClient;
 import net.printix.api.client.login.oauth.LoginClient;
 import net.printix.api.client.login.oauth.TokenAuthClient;
+import net.printix.api.dto.OAuthToken;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -21,12 +22,13 @@ public class ClientFactory {
         return retrofit.create(TokenAuthClient.class);
     }
 
-    public Printix getApiClient(){
+    public Printix getApiClient(OAuthToken token){
         PrinterClient printerClient = new Retrofit.Builder()
                 .baseUrl("https://api.printix.net/")
                 .addConverterFactory(JacksonConverterFactory.create())
+
                 .build().create(PrinterClient.class);
-        return new Printix(printerClient);
+        return new Printix(printerClient, token);
     }
 
     public LoginClient getLoginClient() {

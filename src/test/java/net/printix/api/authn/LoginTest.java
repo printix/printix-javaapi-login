@@ -51,7 +51,7 @@ public class LoginTest {
                 .getOAuthToken(new Username(settings.username),
                         new Password(settings.password),
                         new TenantName(settings.tenantName));
-        Response<PrinterList> printers = new ClientFactory().getApiClient().getPrinters(oAuthToken, new TenantId(UUID.fromString("cfe2385d-18f6-44da-85f9-3915f6fe1048")));
+        Response<PrinterList> printers = new ClientFactory().getApiClient(oAuthToken).getPrinters(new TenantId(UUID.fromString("cfe2385d-18f6-44da-85f9-3915f6fe1048")));
         System.out.println("whuuut");
     }
 }

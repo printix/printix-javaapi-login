@@ -15,6 +15,6 @@ import retrofit2.http.Path;
 
 public interface PrinterClient {
 
-    @GET("/v1/tenants/{tenantId}/printers")
+    @GET("/v1/tenants/{tenantId}/printers?embed=groups")
     public Call<PrinterList> getPrinters(@Header("Authorization") BearerToken token, @Path("tenantId") TenantId tenantId);
 }
