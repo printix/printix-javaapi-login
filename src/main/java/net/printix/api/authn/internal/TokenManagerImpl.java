@@ -49,7 +49,7 @@ public class TokenManagerImpl implements TokenManager {
 		OAuthTokens tokens = currentToken.get();
 		if (tokens == null) tokens = defaultTokens;
 		if (!tokens.isStillValid(1L)) {
-			log.trace("Token {} expired. Refreshing.", tokens);
+			log.trace("Token {} expired or about to expire. Refreshing.", tokens);
 			tokens = tokenRefresher.refresh(tokens);
 			replaceCurrentTokens(tokens);
 		}
@@ -59,6 +59,7 @@ public class TokenManagerImpl implements TokenManager {
 
 	@Override
 	public void doAs(Object user, Runnable action) {
+		if (!tokensPerUser.containsKey(user)) throw new RuntimeException("No oAuthTokens registered for user " + user + ".");
 		currentUser.set(user);
 		currentToken.set(tokensPerUser.get(user));
 		try {
