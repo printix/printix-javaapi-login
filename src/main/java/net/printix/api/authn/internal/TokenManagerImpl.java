@@ -60,13 +60,20 @@ public class TokenManagerImpl implements TokenManager {
 	@Override
 	public void doAs(Object user, Runnable action) {
 		if (!tokensPerUser.containsKey(user)) throw new RuntimeException("No oAuthTokens registered for user " + user + ".");
+		Object oldUser = currentUser.get();
+		OAuthTokens oldToken = currentToken.get();
 		currentUser.set(user);
 		currentToken.set(tokensPerUser.get(user));
 		try {
 			action.run();
 		} finally {
-			currentUser.remove();
-			currentToken.remove();
+			if (oldUser != null) {
+				currentUser.set(oldUser);
+				currentToken.set(oldToken);
+			} else {
+				currentUser.remove();
+				currentToken.remove();
+			}
 		}
 	}
 
