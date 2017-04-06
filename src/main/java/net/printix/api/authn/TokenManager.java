@@ -1,5 +1,7 @@
 package net.printix.api.authn;
 
+import java.util.concurrent.Callable;
+
 import net.printix.api.authn.dto.OAuthTokens;
 
 public interface TokenManager {
@@ -41,6 +43,18 @@ public interface TokenManager {
 	 * @param action
 	 */
 	void doAs(Object user, Runnable action);
+
+
+	/**
+	 * Perform given action with given user as current user and returns a result.
+	 * 
+	 * OAuthTokens for given user must have been registered using {@linkplain #setUserToken(Object, OAuthTokens)} first.
+	 * OAuthTokens can be obtained using {@link AuthenticationClient#signin(String, net.printix.api.authn.dto.UserCredentials)}.
+	 *
+	 * @param user
+	 * @param action
+	 */
+	<V> V callAs(Object user, Callable<V> action);
 
 
 }

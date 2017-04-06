@@ -1,5 +1,6 @@
 package net.printix.api.authn.internal;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -66,6 +67,31 @@ public class TokenManagerImpl implements TokenManager {
 		currentToken.set(tokensPerUser.get(user));
 		try {
 			action.run();
+		} finally {
+			if (oldUser != null) {
+				currentUser.set(oldUser);
+				currentToken.set(oldToken);
+			} else {
+				currentUser.remove();
+				currentToken.remove();
+			}
+		}
+	}
+
+
+	@Override
+	public <V> V callAs(Object user, Callable<V> action) {
+		if (!tokensPerUser.containsKey(user)) throw new RuntimeException("No oAuthTokens registered for user " + user + ".");
+		Object oldUser = currentUser.get();
+		OAuthTokens oldToken = currentToken.get();
+		currentUser.set(user);
+		currentToken.set(tokensPerUser.get(user));
+		try {
+			try {
+				return action.call();
+			} catch (Exception e) {
+				throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e);
+			}
 		} finally {
 			if (oldUser != null) {
 				currentUser.set(oldUser);
