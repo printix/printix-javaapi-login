@@ -40,14 +40,14 @@ import net.printix.api.authn.exception.InvalidCredentialsException;
 @Service
 public class AuthenticationClientImpl implements AuthenticationClient {
 
-	
+
 	@Autowired
 	private OAuthConfig oAuthConfig;
-	
+
 	@Value("${printix.domain:printix.net}")
 	private String printixDomain;
 
-	
+
 	private final RestTemplate restTemplate;
 
 
@@ -126,10 +126,10 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 				.scheme("https")
 				.host("auth." + printixDomain)
 				.path("/login")
-		        .queryParam("username", userCredentials.getUsername())
-		        .queryParam("password", userCredentials.getPassword())
-		        .queryParam("jwt", initialJwt.getJwt())
-		        .build().toUri();
+				.queryParam("username", userCredentials.getUsername())
+				.queryParam("password", userCredentials.getPassword())
+				.queryParam("jwt", initialJwt.getJwt())
+				.build().toUri();
 		RequestEntity<Void> requestEntity = RequestEntity.post(uri)
 				.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 				.build();
