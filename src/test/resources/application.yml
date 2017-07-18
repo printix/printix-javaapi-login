@@ -1,3 +1,8 @@
+  spring:
+    zipkin:
+      enabled: false
+
+
 # Authentication client configuration
 printix:
   domain: devenv.printix.net
@@ -13,11 +18,11 @@ printix:
 # Following configuration should be supplied (overridden) to run the AuthenticationClientIntegrationTest
 test:
   auth_client:
-    trustAnySslCert: false  # Only set true if running in an environment using self-signed ssl certs (devenv)
-    tenantHostName: 
-    otherTenantHostName: 
-    adminUserName: 
-    adminPassword: 
-    globalAdminUserName: 
-    globalAdminPassword: 
-    globalAdminTotpSecret: 
+    trustAnySslCert: true  # Only set true if running in an environment using self-signed ssl certs (devenv)
+    tenantHostName: webtest.devenv.printix.net
+    otherTenantHostName: webtest.devenv.printix.net
+    adminUserName: dev@printix.net
+    adminPassword: Qwe123
+    globalAdminUserName: peter-rw@printix.net
+    globalAdminPassword: 123123
+    globalAdminTotpSecret: something
