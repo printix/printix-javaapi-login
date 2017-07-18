@@ -1,6 +1,6 @@
-  spring:
-    zipkin:
-      enabled: false
+spring:
+  zipkin:
+    enabled: false
 
 
 # Authentication client configuration
