@@ -1,8 +1,10 @@
 package net.printix.api.authn.internal;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -122,14 +124,19 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * a redirect and whether or not Mfa authentication is required to get an oauth code 
 	 */
 	private UsernamePasswordResponse postUsernamePassword(UserCredentials userCredentials, Jwt initialJwt) {
-		URI uri = UriComponentsBuilder.newInstance()
-				.scheme("https")
-				.host("auth." + printixDomain)
-				.path("/login")
-				.queryParam("username", userCredentials.getUsername())
-				.queryParam("password", userCredentials.getPassword())
-				.queryParam("jwt", initialJwt.getJwt())
-				.build().toUri();
+		URI uri;
+		try {
+			uri = UriComponentsBuilder.newInstance()
+					.scheme("https")
+					.host("auth." + printixDomain)
+					.path("/login")
+					.queryParam("username", URLEncoder.encode(userCredentials.getUsername(), "utf-8"))
+					.queryParam("password", URLEncoder.encode(userCredentials.getPassword(), "utf-8"))
+					.queryParam("jwt", initialJwt.getJwt())
+					.build(true).toUri();
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 		RequestEntity<Void> requestEntity = RequestEntity.post(uri)
 				.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 				.build();
