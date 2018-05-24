@@ -57,4 +57,13 @@ public interface TokenManager {
 	<V> V callAs(Object user, Callable<V> action);
 
 
+	/**
+	 * Checks if tokens have been registered for given user.
+	 * 
+	 * @param user
+	 * @return true if tokens for given user has already been registered.
+	 */
+	boolean hasTokensForUser(Object user);
+
+
 }
