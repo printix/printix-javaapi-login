@@ -40,6 +40,12 @@ public class TokenManagerImpl implements TokenManager {
 
 
 	@Override
+	public OAuthTokens getUserToken(Object user) {
+		return tokensPerUser.get(user);
+	}
+
+
+	@Override
 	public boolean hasTokensForUser(Object user) {
 		return tokensPerUser.containsKey(user);
 	}

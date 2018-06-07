@@ -14,9 +14,14 @@ public interface TokenManager {
 	 * 
 	 * @param user - user id / user name or other key
 	 * @param oAuthTokens
-	 * @throws RuntimeException if a token is already registered for given user.
 	 */
 	void setUserToken(Object user, OAuthTokens oAuthTokens);
+
+
+	/**
+	 * Gets token for given user if registered (returns null if not).
+	 */
+	OAuthTokens getUserToken(Object user);
 
 
 	/**
