@@ -49,30 +49,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-<!--
- 		<dependency>
-			<groupId>org.projectreactor</groupId>
-			<artifactId>reactor-spring</artifactId>
-			<version>1.0.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webflux</artifactId>
-		</dependency>
- -->
-		<!-- Json -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jdk8</artifactId>
-		</dependency>
 
 
 		<!-- Two-factor authentication (generating one-time passwords) -->
@@ -104,8 +80,6 @@
 		</dependency>
 
 		<!-- Testing -->
-		<!-- <dependency> <groupId>net.printix.common</groupId> <artifactId>common-test</artifactId> 
-			<version>0.0.1-SNAPSHOT</version> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
