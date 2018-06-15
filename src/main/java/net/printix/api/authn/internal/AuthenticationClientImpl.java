@@ -1,9 +1,8 @@
 package net.printix.api.authn.internal;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -13,17 +12,19 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse.Headers;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
+import lombok.extern.slf4j.Slf4j;
 import net.printix.api.authn.AuthenticationClient;
 import net.printix.api.authn.config.OAuthConfig;
 import net.printix.api.authn.dto.OAuthTokens;
@@ -33,6 +34,7 @@ import net.printix.api.authn.dto.internal.OAuthCredentials;
 import net.printix.api.authn.dto.internal.TotpCredentials;
 import net.printix.api.authn.dto.internal.UsernamePasswordResponse;
 import net.printix.api.authn.exception.InvalidCredentialsException;
+import reactor.core.publisher.Mono;
 
 /**
  * Authentication client.
@@ -40,6 +42,7 @@ import net.printix.api.authn.exception.InvalidCredentialsException;
  * @author peter
  */
 @Service
+@Slf4j
 public class AuthenticationClientImpl implements AuthenticationClient {
 
 
@@ -50,52 +53,51 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	private String printixDomain;
 
 
-	private final RestTemplate restTemplate;
+	private final WebClient webClient;
+	private final WebClient nonRedirectingWebClient; // "non-redirecting" because we need to intercept redirects.
 
 
-	/**
-	 * The default http client that's loaded with a rest template, follows redirect from
-	 * GET requests with no way of intercepting the URI redirected to.
-	 * Since not all of these redirects are valid, and some of them contain info we need.
-	 * We just disable any redirects
-	 */
-	private final RestTemplate nonRedirectingRestTemplate;
-
-
-	public AuthenticationClientImpl() {
-		this.restTemplate = new RestTemplate();
-		this.nonRedirectingRestTemplate = new RestTemplate(new SimpleClientHttpRequestFactory() {
-			@Override
-			protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
-				super.prepareConnection(connection, httpMethod);
-				connection.setInstanceFollowRedirects(false);
-			}
-		});
+	public AuthenticationClientImpl(WebClient.Builder webClientBuilder) {
+		// TODO Spring 5.1 should support per-webClient configuration of whether redirects should be followed or not. Until then both clients do NOT follow redirects.
+		// It has has to be specified per request on the HttpClientRequest
+		// https://stackoverflow.com/questions/47655789/how-to-make-reactive-webclient-follow-3xx-redirects?rq=1
+		// https://github.com/reactor/reactor-netty/issues/235
+		 this.webClient = webClientBuilder
+				 .filter(ExchangeFilterFunctions.statusError(HttpStatus::is4xxClientError, cr -> new HttpClientErrorException(cr.statusCode())))
+				 .filter(ExchangeFilterFunctions.statusError(HttpStatus::is5xxServerError, cr -> new HttpClientErrorException(cr.statusCode())))
+				 .build();
+		 this.nonRedirectingWebClient = webClient; // Builder.build();
 	}
 
 
 	@Override
-	public OAuthTokens signin(String tenantHostName, UserCredentials userCredentials) {
-		Jwt initialJwt = initiateSignInFlow(tenantHostName).orElseThrow(() -> new RuntimeException("unable to perform initial login"));
-		UsernamePasswordResponse usernamePasswordResponse = this.postUsernamePassword(userCredentials, initialJwt);
-		if (usernamePasswordResponse.getRequiresMfa()) {
-			URI uriFromTotp = postTotpCredentials(usernamePasswordResponse.getJwt(), userCredentials.getTotpSecret());
-			String code = getOauthCode(uriFromTotp);
-			Optional<OAuthTokens> postOauthCredentials = this.getOauthCredentials(code);
-			return postOauthCredentials.orElseThrow(() -> new RuntimeException("unable to signin with mfa"));
-		} else {
-			String code = getOauthCode(usernamePasswordResponse.getUri());
-			Optional<OAuthTokens> postOauthCredentials = this.getOauthCredentials(code);
-			return postOauthCredentials.orElseThrow(() -> new RuntimeException("unable to signin as regular user"));
-		}
+	public Mono<OAuthTokens> signin(String tenantHostName, UserCredentials userCredentials) {
+		log.trace("Initiating login flow.");
+		return initiateSignInFlow(tenantHostName)
+				.map(optionalJwt -> optionalJwt.orElseThrow(() -> new RuntimeException("Unable to signin.")))
+				.flatMap(initialJwt -> postUsernamePassword(userCredentials, initialJwt))
+				.flatMap(usernamePasswordResponse -> {
+					if (usernamePasswordResponse.getRequiresMfa()) {
+						Mono<URI> uriFromTotp = postTotpCredentials(usernamePasswordResponse.getJwt(), userCredentials.getTotpSecret());
+						return uriFromTotp.flatMap(this::getOauthCode);
+					} else {
+						return getOauthCode(usernamePasswordResponse.getUri());
+					}
+				})
+				.flatMap(this::getOauthCredentials);
 	}
 
 
-	private Optional<Jwt> initiateSignInFlow(String tenantHostName) {
-		URI uri = buildInitialURI(tenantHostName);
-		ResponseEntity<String> forEntity = nonRedirectingRestTemplate.getForEntity(uri, String.class);
-		HttpHeaders headers = forEntity.getHeaders();
-		return Jwt.fromLocation(headers.getLocation());
+	private Mono<Optional<Jwt>> initiateSignInFlow(String tenantHostName) {
+
+		return nonRedirectingWebClient.get()
+				.uri(buildInitialURI(tenantHostName))
+				.exchange()
+				.map(cr -> {
+					cr.bodyToMono(Void.class); // There is no content. This is to release resources. 
+					Headers headers = cr.headers();
+					return Jwt.fromLocation(headers.asHttpHeaders().getLocation()); //.orElseThrow(() -> new RuntimeException("Unable to perform initial login - missing JWT."));
+				});
 	}
 
 
@@ -123,7 +125,8 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * posts the supplied username+password to the signin service and returns a response containing a Jwt, 
 	 * a redirect and whether or not Mfa authentication is required to get an oauth code 
 	 */
-	private UsernamePasswordResponse postUsernamePassword(UserCredentials userCredentials, Jwt initialJwt) {
+	private Mono<UsernamePasswordResponse> postUsernamePassword(UserCredentials userCredentials, Jwt initialJwt) {
+		log.trace("Posting username and password.");
 		URI uri;
 		try {
 			uri = UriComponentsBuilder.newInstance()
@@ -137,13 +140,14 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		RequestEntity<Void> requestEntity = RequestEntity.post(uri)
-				.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-				.build();
-
-		ResponseEntity<String> responseEntity = restTemplate.exchange(requestEntity, String.class);
-		URI location = authenticated(responseEntity.getHeaders().getLocation(), "Invalid username/password");
-		return new UsernamePasswordResponse(location);
+		return webClient.post().uri(uri)
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.exchange()
+				.map(cr -> {
+					cr.bodyToMono(Void.class);  // There is no content. This is to release resources.
+					URI location = authenticated(cr.headers().asHttpHeaders().getLocation(), "Invalid username/password");
+					return new UsernamePasswordResponse(location);
+				});
 	}
 
 
@@ -151,9 +155,13 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * Builds an oauth token request from the configured properties + the passed in code parameter. 
 	 * posts this to the oauth/token service and return the response. Which is hopefully a usable, valid oauth token
 	 */
-	private Optional<OAuthTokens> getOauthCredentials(String code) {
+	private Mono<OAuthTokens> getOauthCredentials(String code) {
 		OAuthCredentials oAuthCredentials = new OAuthCredentials(oAuthConfig.getGrantType(), code, oAuthConfig.getRedirectUri(), oAuthConfig.getClientId(), oAuthConfig.getClientSecret());
-		return Optional.ofNullable(restTemplate.postForObject(oAuthConfig.getSigninUri() + "/oauth/token", oAuthCredentials.asHttpEntitiy(), OAuthTokens.class));
+		return webClient.post()
+				.uri(asUri(oAuthConfig.getSigninUri() + "/oauth/token"))
+				.body(BodyInserters.fromFormData(oAuthCredentials.asFormData()))
+				.retrieve()
+				.bodyToMono(OAuthTokens.class);
 	}
 
 
@@ -161,12 +169,17 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * fetches the URI, reads the Location header from the response, parses a "code" query param from
 	 * that, and returns said code as a string
 	 */
-	private String getOauthCode(URI signinResponse) {
-		ResponseEntity<String> redirectWithCode = nonRedirectingRestTemplate.getForEntity(signinResponse, String.class);
-		URI location = authenticated(redirectWithCode.getHeaders().getLocation(), "");
-		List<NameValuePair> redirectQueryParameters = URLEncodedUtils.parse(location.getQuery(), StandardCharsets.UTF_8);
-		NameValuePair code = redirectQueryParameters.stream().filter(nvp -> "code".equals(nvp.getName())).findFirst().orElseThrow(() -> new RuntimeException("no code found in redirect"));
-		return code.getValue();
+	private Mono<String> getOauthCode(URI signinResponse) {
+		return nonRedirectingWebClient.get()
+				.uri(signinResponse)
+				.exchange()
+				.map(cr -> {
+					cr.bodyToMono(Void.class);  // There is no content. This is to release resources.
+					URI location = authenticated(cr.headers().asHttpHeaders().getLocation(), "");
+					List<NameValuePair> redirectQueryParameters = URLEncodedUtils.parse(location.getQuery(), StandardCharsets.UTF_8);
+					NameValuePair code = redirectQueryParameters.stream().filter(nvp -> "code".equals(nvp.getName())).findFirst().orElseThrow(() -> new RuntimeException("no code found in redirect"));
+					return code.getValue();
+				});
 	}
 
 
@@ -174,13 +187,33 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * Generates a valid (by the mfa_seed configured + the current system time) onetime password,
 	 *  posts this + the jwt parameter to the authentication service and returns the response redirect
 	 */
-	private URI postTotpCredentials(Jwt jwtWithMfa, String mfaSeed) {
+	private Mono<URI> postTotpCredentials(Jwt jwtWithMfa, String mfaSeed) {
 		GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
 		int totpPassword = googleAuthenticator.getTotpPassword(mfaSeed);
 		TotpCredentials totpCredentials = new TotpCredentials(jwtWithMfa.getJwt(), totpPassword);
-		URI uri = restTemplate.postForLocation(oAuthConfig.getSigninUri() + "/login", totpCredentials.asHttpEntitiy());
-		URI totpResponse = authenticated(uri, "TOTP credentials invalid");
-		return totpResponse;
+
+		return webClient.post()
+				.uri(asUri(oAuthConfig.getSigninUri() + "/login"))
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(BodyInserters.fromFormData(totpCredentials.asFormData()))
+				.exchange()
+				.map(cr -> {
+					cr.bodyToMono(Void.class);  // There is no content. This is to release resources.
+					return authenticated(cr.headers().asHttpHeaders().getLocation(), "TOTP credentials invalid.");
+				});
+
+		//		URI uri = webClient.postForLocation(oAuthConfig.getSigninUri() + "/login", totpCredentials.asHttpEntitiy());
+		//		URI totpResponse = authenticated(uri, "TOTP credentials invalid");
+		//		return totpResponse;
+	}
+
+
+	private URI asUri(String uri) {
+		try {
+			return new URI(uri);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 

@@ -23,11 +23,12 @@ public class Jwt {
     }
     
     public static Optional<Jwt> fromLocation(URI location) {
+    	if (location == null) return Optional.empty();
         Matcher matcher = JWT_PARAM.matcher(location.toString());
-        if(matcher.find() && matcher.groupCount() == 2){
+        if (matcher.find() && matcher.groupCount() == 2) {
             String jwt = matcher.group(1);
             return Optional.ofNullable(new Jwt(jwt));
-        }else{
+        } else {
             return Optional.empty();
         }
     }

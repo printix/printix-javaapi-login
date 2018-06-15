@@ -2,6 +2,7 @@ package net.printix.api.authn;
 
 import net.printix.api.authn.dto.OAuthTokens;
 import net.printix.api.authn.dto.UserCredentials;
+import reactor.core.publisher.Mono;
 
 public interface AuthenticationClient {
 
@@ -12,6 +13,6 @@ public interface AuthenticationClient {
 	 * @param userCredentials
 	 * @return a set of oAuth tokens.
 	 */
-	public OAuthTokens signin(String tenantHostName, UserCredentials userCredentials);
+	public Mono<OAuthTokens> signin(String tenantHostName, UserCredentials userCredentials);
 
 }

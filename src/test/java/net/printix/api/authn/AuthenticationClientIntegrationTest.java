@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ import net.printix.api.authn.internal.AuthenticationClientImpl;
 public class AuthenticationClientIntegrationTest {
 
 	@Configuration
+	@EnableAutoConfiguration
 	@EnablePrintixAuthenticationClient
 	public static class TestConfig {
 	}
@@ -99,14 +101,14 @@ public class AuthenticationClientIntegrationTest {
 
 	@Test
 	public void testSignin_adminUsingBuiltinAuthentication() {
-		OAuthTokens authTokens = authClient.signin(tenantHostName, new UserCredentials(adminUserName, adminPassword));
+		OAuthTokens authTokens = authClient.signin(tenantHostName, new UserCredentials(adminUserName, adminPassword)).block();
 		assertThat(authTokens).isNotNull();
 	}
 
 
 	@Test
 	public void testSignin_adminUsingBuiltinAuthentication_noTenant() {
-		OAuthTokens authTokens = authClient.signin(null, new UserCredentials(adminUserName, adminPassword));
+		OAuthTokens authTokens = authClient.signin(null, new UserCredentials(adminUserName, adminPassword)).block();
 		assertThat(authTokens).isNotNull();
 	}
 
@@ -116,28 +118,28 @@ public class AuthenticationClientIntegrationTest {
 	 */
 	@Test(expected = InvalidCredentialsException.class)
 	public void testSignin_adminUsingBuiltinAuthentication_otherTenant() {
-		OAuthTokens authTokens = authClient.signin(otherTenantHostName, new UserCredentials(adminUserName, adminPassword));
+		OAuthTokens authTokens = authClient.signin(otherTenantHostName, new UserCredentials(adminUserName, adminPassword)).block();
 		assertThat(authTokens).isNotNull();
 	}
 
 
 	@Test
 	public void testSignin_globalAdministrator() {
-		OAuthTokens authTokens = authClient.signin(tenantHostName, new UserCredentials(globalAdminUserName, globalAdminPassword, globalAdminTotpSecret));
+		OAuthTokens authTokens = authClient.signin(tenantHostName, new UserCredentials(globalAdminUserName, globalAdminPassword, globalAdminTotpSecret)).block();
 		assertThat(authTokens).isNotNull();
 	}
 
 
 	@Test
 	public void testSignin_globalAdministrator_noTenant() {
-		OAuthTokens authTokens = authClient.signin(null, new UserCredentials(globalAdminUserName, globalAdminPassword, globalAdminTotpSecret));
+		OAuthTokens authTokens = authClient.signin(null, new UserCredentials(globalAdminUserName, globalAdminPassword, globalAdminTotpSecret)).block();
 		assertThat(authTokens).isNotNull();
 	}
 
 
 	@Test(expected = InvalidCredentialsException.class)
 	public void testSignin_invalidCredentials() {
-		authClient.signin(tenantHostName, new UserCredentials("no-such-user", "not_a_password"));
+		authClient.signin(tenantHostName, new UserCredentials("no-such-user", "not_a_password")).block();
 	}
 
 
@@ -145,7 +147,7 @@ public class AuthenticationClientIntegrationTest {
 	public void testSignin_invalidTenant() {
 		try {
 			String nonExistingTenantHostName = UUID.randomUUID().toString();
-			authClient.signin(nonExistingTenantHostName, new UserCredentials("no-such-user", "not_a_password"));
+			authClient.signin(nonExistingTenantHostName, new UserCredentials("no-such-user", "not_a_password")).block();
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND) return; // Expected response. Success!
 			fail("Login on non-existing tenant should have returned 404 Not Found- Got http status: " + e.getStatusCode() +

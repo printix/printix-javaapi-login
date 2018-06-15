@@ -22,12 +22,17 @@ public class TotpCredentials {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     }
 
+    @Deprecated // Not used anymore? (else un-deprecate)
     public HttpEntity<MultiValueMap<String, String>> asHttpEntitiy() {
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(asFormData(), headers);
+        return request;
+    }
+
+	public MultiValueMap<String, String> asFormData() {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("jwt", jwt);
         map.add("oneTimePassword", String.valueOf(totp));
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        return request;
-    }
+        return map;
+	}
 
 }
