@@ -3,16 +3,8 @@ package net.printix.api.authn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
-import java.security.GeneralSecurityException;
-import java.security.cert.X509Certificate;
 import java.util.UUID;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,32 +63,33 @@ public class AuthenticationClientIntegrationTest {
 	private String globalAdminTotpSecret;
 
 
-	@Before
-	public void init() {
+// TODO I don't think we need trustAnySslCert anymore. Check and, if possible, remove it (also from jenkins configs and eclipse etc.)
+//	@Before
+//	public void init() {
 		// Install all-trusting trust manager if running in environment using self-signed certs.
-		if (trustAnySslCert) {
-			TrustManager[] trustAllCerts = new TrustManager[] { 
-					new X509TrustManager() {     
-						public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-							return new X509Certificate[0];
-						} 
-						public void checkClientTrusted( 
-								java.security.cert.X509Certificate[] certs, String authType) {
-						} 
-						public void checkServerTrusted( 
-								java.security.cert.X509Certificate[] certs, String authType) {
-						}
-					} 
-			}; 
-			// Install the all-trusting trust manager
-			try {
-				SSLContext sc = SSLContext.getInstance("SSL"); 
-				sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-			} catch (GeneralSecurityException e) {
-			}
-		}
-	}
+//		if (trustAnySslCert) {
+//			TrustManager[] trustAllCerts = new TrustManager[] { 
+//					new X509TrustManager() {     
+//						public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
+//							return new X509Certificate[0];
+//						} 
+//						public void checkClientTrusted( 
+//								java.security.cert.X509Certificate[] certs, String authType) {
+//						} 
+//						public void checkServerTrusted( 
+//								java.security.cert.X509Certificate[] certs, String authType) {
+//						}
+//					} 
+//			}; 
+//			// Install the all-trusting trust manager
+//			try {
+//				SSLContext sc = SSLContext.getInstance("SSL"); 
+//				sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
+//				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//			} catch (GeneralSecurityException e) {
+//			}
+//		}
+//	}
 
 
 	@Test

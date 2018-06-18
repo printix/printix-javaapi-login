@@ -1,8 +1,9 @@
 package net.printix.api.authn;
 
-import java.util.concurrent.Callable;
-
 import net.printix.api.authn.dto.OAuthTokens;
+import net.printix.api.authn.dto.UserCredentials;
+import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 public interface TokenManager {
 
@@ -21,21 +22,13 @@ public interface TokenManager {
 	/**
 	 * Gets token for given user if registered (returns null if not).
 	 */
-	OAuthTokens getUserToken(Object user);
-
-
-	/**
-	 * Sets a default token.
-	 * 
-	 * This is useful if using the same credential all the time. It is NOT thread-safe!
-	 */
-	void setDefaultToken(OAuthTokens oAuthTokens);
+	OAuthTokens getUserTokens(Object user);
 
 
 	/**
 	 * Gets the current oAuth token, refreshing it first if required. 
 	 */
-	OAuthTokens getCurrentToken();
+	Mono<OAuthTokens> getCurrentTokens();
 
 
 	/**
@@ -47,7 +40,7 @@ public interface TokenManager {
 	 * @param user
 	 * @param action
 	 */
-	void doAs(Object user, Runnable action);
+//	void doAs(Object user, Runnable action);
 
 
 	/**
@@ -59,7 +52,7 @@ public interface TokenManager {
 	 * @param user
 	 * @param action
 	 */
-	<V> V callAs(Object user, Callable<V> action);
+//	<V> V callAs(Object user, Callable<V> action);
 
 
 	/**
@@ -69,6 +62,32 @@ public interface TokenManager {
 	 * @return true if tokens for given user has already been registered.
 	 */
 	boolean hasTokensForUser(Object user);
+
+
+	/**
+	 * Creates a reactor Context with given users tokens.
+	 * 
+	 * Given tokens must be registered with TokenManager beforehand.
+	 * 
+	 * @param user
+	 * @return Context
+	 */
+	Context contextFor(Object adminUserName);
+
+
+	/**
+	 * Creates a reactor Context with given users tokens.
+	 * 
+	 * If given user has already been signed in, and tokens registered with TokenManager under
+	 * the userCredentials.username given, the already registered tokens will be used.<br/> 
+	 * If not, the user is logged in, and tokens are cached (ie. registered in TokenManager). 
+	 * 
+	 * @param tenantHostName
+	 * @param userCredentials
+	 * @return Context
+	 * @throws RuntimeException if invalid credentials are given or if login takes too long.
+	 */
+	Context contextFor(String tenantHostName, UserCredentials userCredentials);
 
 
 }

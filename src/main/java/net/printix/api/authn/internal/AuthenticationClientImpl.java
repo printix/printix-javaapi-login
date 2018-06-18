@@ -201,10 +201,6 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 					cr.bodyToMono(Void.class);  // There is no content. This is to release resources.
 					return authenticated(cr.headers().asHttpHeaders().getLocation(), "TOTP credentials invalid.");
 				});
-
-		//		URI uri = webClient.postForLocation(oAuthConfig.getSigninUri() + "/login", totpCredentials.asHttpEntitiy());
-		//		URI totpResponse = authenticated(uri, "TOTP credentials invalid");
-		//		return totpResponse;
 	}
 
 

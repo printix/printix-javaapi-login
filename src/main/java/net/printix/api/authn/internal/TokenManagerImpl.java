@@ -1,6 +1,7 @@
 package net.printix.api.authn.internal;
 
-import java.util.concurrent.Callable;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -8,8 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import net.printix.api.authn.AuthenticationClient;
 import net.printix.api.authn.TokenManager;
 import net.printix.api.authn.dto.OAuthTokens;
+import net.printix.api.authn.dto.UserCredentials;
+import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 @Service
 public class TokenManagerImpl implements TokenManager {
@@ -20,14 +25,10 @@ public class TokenManagerImpl implements TokenManager {
 	@Autowired
 	private TokenRefresher tokenRefresher;
 
+	@Autowired
+	private AuthenticationClient authenticationClient;
 
 	private ConcurrentHashMap<Object, OAuthTokens> tokensPerUser = new ConcurrentHashMap<>();
-
-	private ThreadLocal<Object> currentUser = new ThreadLocal<>();
-	private ThreadLocal<OAuthTokens> currentToken = new ThreadLocal<>();
-
-	private OAuthTokens defaultTokens;
-
 
 
 	@Override
@@ -40,7 +41,7 @@ public class TokenManagerImpl implements TokenManager {
 
 
 	@Override
-	public OAuthTokens getUserToken(Object user) {
+	public OAuthTokens getUserTokens(Object user) {
 		return tokensPerUser.get(user);
 	}
 
@@ -52,79 +53,51 @@ public class TokenManagerImpl implements TokenManager {
 
 
 	@Override
-	public void setDefaultToken(OAuthTokens oAuthTokens) {
-		this.defaultTokens = oAuthTokens;
-	}
-
-
-	@Override
-	public OAuthTokens getCurrentToken() {
-		OAuthTokens tokens = currentToken.get();
-		if (tokens == null) tokens = defaultTokens;
-		if (!tokens.isStillValid(1L)) {
-			log.trace("Token {} expired or about to expire. Refreshing.", tokens);
-			tokens = tokenRefresher.refresh(tokens);
-			replaceCurrentTokens(tokens);
-		}
-		return tokens;
-	}
-
-
-	@Override
-	public void doAs(Object user, Runnable action) {
-		if (!tokensPerUser.containsKey(user)) throw new RuntimeException("No oAuthTokens registered for user " + user + ".");
-		Object oldUser = currentUser.get();
-		OAuthTokens oldToken = currentToken.get();
-		currentUser.set(user);
-		currentToken.set(tokensPerUser.get(user));
-		try {
-			action.run();
-		} finally {
-			if (oldUser != null) {
-				currentUser.set(oldUser);
-				currentToken.set(oldToken);
+	public Mono<OAuthTokens> getCurrentTokens() {
+		return Mono.subscriberContext()
+		.flatMap(context -> {
+			OAuthTokens tokens = context.get(OAuthTokens.class);
+			Mono<OAuthTokens> tokensMono = Mono.just(tokens);
+			if (tokens.isStillValid(1L)) {
+				return tokensMono;
 			} else {
-				currentUser.remove();
-				currentToken.remove();
+				log.trace("Token {} expired or about to expire. Refreshing.", tokens);
+				return tokensMono
+				.flatMap(t -> tokenRefresher.refresh(Mono.just(t)))
+				.flatMap(this::replaceCurrentTokens)
+				.map(ctx -> context.get(AuthContext.class).getTokens());
 			}
-		}
+		});
+	}
+
+
+	private Mono<AuthContext> replaceCurrentTokens(OAuthTokens oAuthTokens) {
+		return Mono.subscriberContext()
+				.map(context -> {
+					AuthContext authContext = context.get(AuthContext.class);
+					authContext.setTokens(oAuthTokens);
+					log.trace("Refreshed tokens for user {}.", authContext.getUser());
+					return authContext;
+				});
 	}
 
 
 	@Override
-	public <V> V callAs(Object user, Callable<V> action) {
-		if (!tokensPerUser.containsKey(user)) throw new RuntimeException("No oAuthTokens registered for user " + user + ".");
-		Object oldUser = currentUser.get();
-		OAuthTokens oldToken = currentToken.get();
-		currentUser.set(user);
-		currentToken.set(tokensPerUser.get(user));
-		try {
-			try {
-				return action.call();
-			} catch (Exception e) {
-				throw e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e);
-			}
-		} finally {
-			if (oldUser != null) {
-				currentUser.set(oldUser);
-				currentToken.set(oldToken);
-			} else {
-				currentUser.remove();
-				currentToken.remove();
-			}
-		}
+	public Context contextFor(Object user) {
+		return Context.of(OAuthTokens.class, Optional.ofNullable(getUserTokens(user)).orElseThrow(() -> new RuntimeException("User " + user + " is not registered with AuthManager.")));
 	}
 
 
-	private void replaceCurrentTokens(OAuthTokens oAuthTokens) {
-		Object user = currentUser.get();
-		if (user != null) {
-			log.trace("Refreshed tokens for user {}.", user);
-			currentToken.set(oAuthTokens);
-			tokensPerUser.put(currentUser.get(), oAuthTokens);
+	@Override
+	public Context contextFor(String tenantHostName, UserCredentials userCredentials) {
+		if (hasTokensForUser(userCredentials.getUsername())) {
+			return contextFor(userCredentials.getUsername());
 		} else {
-			defaultTokens = oAuthTokens;
-			log.trace("Refreshed default tokens.", user);
+			return authenticationClient.signin(tenantHostName, userCredentials)
+			.map(oAuthTokens -> {
+				tokensPerUser.put(userCredentials.getUsername(), oAuthTokens);
+				return Context.of(OAuthTokens.class, oAuthTokens);
+			}).block(Duration.ofSeconds(30));
 		}
 	}
 

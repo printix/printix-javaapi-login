@@ -26,13 +26,13 @@ public class OAuthCredentials {
         this.clientSecret = clientSecret;
     }
 
-    public HttpEntity<MultiValueMap<String, String>> asHttpEntitiy() {
-        MultiValueMap<String, String> map = asFormData();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        return request;
-    }
+//    public HttpEntity<MultiValueMap<String, String>> asHttpEntitiy() {
+//        MultiValueMap<String, String> map = asFormData();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+//        return request;
+//    }
 
 	public MultiValueMap<String, String> asFormData() {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
