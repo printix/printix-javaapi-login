@@ -1,6 +1,5 @@
 package net.printix.api.authn.dto.internal;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
@@ -21,12 +20,6 @@ public class TotpCredentials {
         this.totp = totp;
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     }
-
-//    @Deprecated // Not used anymore? (else un-deprecate)
-//    public HttpEntity<MultiValueMap<String, String>> asHttpEntitiy() {
-//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(asFormData(), headers);
-//        return request;
-//    }
 
 	public MultiValueMap<String, String> asFormData() {
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
