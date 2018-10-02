@@ -5,3 +5,4 @@
 /.factorypath
 /.project
 *.iml
+application-local.yml
