@@ -20,7 +20,7 @@ public class OAuthConfig {
 	private static final String PRINTIX_OAUTH_CLIENT_SECRET_PROPERTY = "printix.oauth.client_secret";
 	private static final String PRINTIX_OAUTH_GRANT_TYPE_PROPERTY = "printix.oauth.grant_type";
 	private static final String PRINTIX_OAUTH_SIGNIN_URI_SECRET_PROPERTY = "printix.oauth.signin_uri";
-	private static final String PRINTIX_OAUTH_REDIRECT_URI_PROPERTY = "printix.oauth.redirect_uri";;
+	private static final String PRINTIX_OAUTH_REDIRECT_URI_PROPERTY = "printix.oauth.redirect_uri";
 
 
 	/**

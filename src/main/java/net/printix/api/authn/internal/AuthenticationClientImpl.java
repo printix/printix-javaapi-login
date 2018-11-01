@@ -89,7 +89,6 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 
 
 	private Mono<Optional<Jwt>> initiateSignInFlow(String tenantHostName) {
-
 		return nonRedirectingWebClient.get()
 				.uri(buildInitialURI(tenantHostName))
 				.exchange()
@@ -156,6 +155,7 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * posts this to the oauth/token service and return the response. Which is hopefully a usable, valid oauth token
 	 */
 	private Mono<OAuthTokens> getOauthCredentials(String code) {
+		log.trace("getOauthCredentials.");
 		OAuthCredentials oAuthCredentials = new OAuthCredentials(oAuthConfig.getGrantType(), code, oAuthConfig.getRedirectUri(), oAuthConfig.getClientId(), oAuthConfig.getClientSecret());
 		return webClient.post()
 				.uri(asUri(oAuthConfig.getSigninUri() + "/oauth/token"))
@@ -170,6 +170,7 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 * that, and returns said code as a string
 	 */
 	private Mono<String> getOauthCode(URI signinResponse) {
+		log.trace("getOauthCode.");
 		return nonRedirectingWebClient.get()
 				.uri(signinResponse)
 				.exchange()
@@ -188,10 +189,10 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	 *  posts this + the jwt parameter to the authentication service and returns the response redirect
 	 */
 	private Mono<URI> postTotpCredentials(Jwt jwtWithMfa, String mfaSeed) {
+		log.trace("postTotpCredentials.");
 		GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
 		int totpPassword = googleAuthenticator.getTotpPassword(mfaSeed);
 		TotpCredentials totpCredentials = new TotpCredentials(jwtWithMfa.getJwt(), totpPassword);
-
 		return webClient.post()
 				.uri(asUri(oAuthConfig.getSigninUri() + "/login"))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
