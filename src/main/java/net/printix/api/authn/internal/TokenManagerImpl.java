@@ -41,7 +41,7 @@ public class TokenManagerImpl implements TokenManager {
 
 
 	@Override
-	public OAuthTokens getUserTokens(Object user) {
+	public OAuthTokens getTokensFor(Object user) {
 		return tokensPerUser.get(user);
 	}
 
@@ -84,7 +84,7 @@ public class TokenManagerImpl implements TokenManager {
 
 	@Override
 	public Context contextFor(Object user) {
-		return Context.of(OAuthTokens.class, Optional.ofNullable(getUserTokens(user)).orElseThrow(() -> new RuntimeException("User " + user + " is not registered with AuthManager.")));
+		return Context.of(OAuthTokens.class, Optional.ofNullable(getTokensFor(user)).orElseThrow(() -> new RuntimeException("User " + user + " is not registered with AuthManager.")));
 	}
 
 

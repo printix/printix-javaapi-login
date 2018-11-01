@@ -74,7 +74,7 @@ public class TokenManagerTest {
 			return Flux.range(0, RANGE).delayElements(Duration.ofMillis(1))
 					.flatMap(i -> tokenManager.getCurrentTokens().map(currentTokens -> {
 						String user = credentials.getUsername();
-						OAuthTokens userTokens = tokenManager.getUserTokens(user);
+						OAuthTokens userTokens = tokenManager.getTokensFor(user);
 						assertThat(currentTokens).as("Current tokens are not the right tokens for " + user).isEqualTo(userTokens);
 						return new Tuple(user, i, Instant.now());
 					}))

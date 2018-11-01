@@ -22,7 +22,7 @@ public interface TokenManager {
 	/**
 	 * Gets token for given user if registered (returns null if not).
 	 */
-	OAuthTokens getUserTokens(Object user);
+	OAuthTokens getTokensFor(Object user);
 
 
 	/**
@@ -72,7 +72,7 @@ public interface TokenManager {
 	 * @param user
 	 * @return Context
 	 */
-	Context contextFor(Object adminUserName);
+	Context contextFor(Object user);
 
 
 	/**
