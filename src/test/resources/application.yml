@@ -18,11 +18,26 @@ printix:
 # Following configuration should be supplied (overridden) to run the AuthenticationClientIntegrationTest
 test:
   auth_client:
-    trustAnySslCert: true  # Only set true if running in an environment using self-signed ssl certs (devenv)
-    tenantHostName: webtest.devenv.printix.net
-    otherTenantHostName: webtest.devenv.printix.net
-    adminUserName: dev@printix.net
-    adminPassword: Qwe123
-    globalAdminUserName: peter-rw@printix.net
-    globalAdminPassword: 123123
-    globalAdminTotpSecret: something
+    trustAnySslCert: true
+    tenantHostName: apitest
+    otherTenantHostName: webtest
+    adminUserName: apitestadmin@printix.net
+    adminPassword: Qwerty1234
+    globalAdminUserName: apitest@printix.net
+    globalAdminPassword: Qwerty1234
+    globalAdminTotpSecret: OWIUSZ2ZQTIB4BXM
+
+    
+logging:
+  level:
+    net.printix: TRACE
+#    reactor.ipc.netty.channel.ChannelOperationsHandler: DEBUG
+#    reactor.ipc.netty.http.server.HttpServer: DEBUG
+    reactor.ipc.netty.http.client: DEBUG  # Setting this AND reactor.ipc.netty.channel to DEBUG to have full requests and responses logged.
+    reactor.ipc.netty.channel: DEBUG 
+#    io.reactivex.netty.protocol.http.client: DEBUG
+#    io.netty.handler: DEBUG
+#    io.netty.handler.proxy.HttpProxyHandler: DEBUG
+#    io.netty.handler.proxy.ProxyHandler: DEBUG
+#    org.springframework.web.reactive.function.client: DEBUG
+    
