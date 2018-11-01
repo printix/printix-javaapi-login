@@ -19,10 +19,10 @@ printix:
 test:
   auth_client:
     trustAnySslCert: true  # Only set true if running in an environment using self-signed ssl certs (devenv)
-    tenantHostName: webtest.devenv.printix.net
-    otherTenantHostName: webtest.devenv.printix.net
-    adminUserName: dev@printix.net
-    adminPassword: Qwe123
-    globalAdminUserName: peter-rw@printix.net
-    globalAdminPassword: 123123
-    globalAdminTotpSecret: something
+    tenantHostName: apitest
+    otherTenantHostName: webtest
+    adminUserName: apitestadmin@printix.net
+    adminPassword: Qwerty1234
+    globalAdminUserName: apitest@printix.net
+    globalAdminPassword: Qwerty1234
+    globalAdminTotpSecret: OWIUSZ2ZQTIB4BXM
