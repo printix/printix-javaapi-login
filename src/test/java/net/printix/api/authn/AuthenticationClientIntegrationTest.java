@@ -44,9 +44,6 @@ public class AuthenticationClientIntegrationTest {
 	private String otherTenantHostName;
 
 
-	@Value("${test.auth_client.trustAnySslCert}")
-	private boolean trustAnySslCert;
-
 	@Value("${test.auth_client.adminUserName}")
 	private String adminUserName;
 
@@ -61,35 +58,6 @@ public class AuthenticationClientIntegrationTest {
 
 	@Value("${test.auth_client.globalAdminTotpSecret}")
 	private String globalAdminTotpSecret;
-
-
-// TODO I don't think we need trustAnySslCert anymore. Check and, if possible, remove it (also from jenkins configs and eclipse etc.)
-//	@Before
-//	public void init() {
-		// Install all-trusting trust manager if running in environment using self-signed certs.
-//		if (trustAnySslCert) {
-//			TrustManager[] trustAllCerts = new TrustManager[] { 
-//					new X509TrustManager() {     
-//						public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-//							return new X509Certificate[0];
-//						} 
-//						public void checkClientTrusted( 
-//								java.security.cert.X509Certificate[] certs, String authType) {
-//						} 
-//						public void checkServerTrusted( 
-//								java.security.cert.X509Certificate[] certs, String authType) {
-//						}
-//					} 
-//			}; 
-//			// Install the all-trusting trust manager
-//			try {
-//				SSLContext sc = SSLContext.getInstance("SSL"); 
-//				sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-//				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-//			} catch (GeneralSecurityException e) {
-//			}
-//		}
-//	}
 
 
 	@Test

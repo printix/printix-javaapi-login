@@ -18,7 +18,6 @@ printix:
 # Following configuration should be supplied (overridden) to run the AuthenticationClientIntegrationTest
 test:
   auth_client:
-    trustAnySslCert: true
     tenantHostName: apitest
     otherTenantHostName: webtest
     adminUserName: apitestadmin@printix.net
