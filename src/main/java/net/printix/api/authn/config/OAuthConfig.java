@@ -102,7 +102,7 @@ public class OAuthConfig {
 		if (clientId == null) throw new RuntimeException("Missing required configuration property " + PRINTIX_OAUTH_CLIENT_ID_PROPERTY);
 		if (clientSecret == null) clientSecret = "thehouseisonfire";
 		if (grantType == null) grantType = "authorization_code";
-		if (signinUri == null) signinUri = "https://auth." + domain + "/";
+		if (signinUri == null) signinUri = "https://auth." + domain;
 		if (redirectUri == null) redirectUri = "https://auth." + domain + "/";
 	}
 

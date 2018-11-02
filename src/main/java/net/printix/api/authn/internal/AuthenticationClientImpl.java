@@ -159,7 +159,7 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 		log.trace("getOauthCredentials.");
 		OAuthCredentials oAuthCredentials = new OAuthCredentials(oAuthConfig.getGrantType(), code, oAuthConfig.getRedirectUri(), oAuthConfig.getClientId(), oAuthConfig.getClientSecret());
 		return webClient.post()
-				.uri(asUri(oAuthConfig.getSigninUri() + "oauth/token"))
+				.uri(asUri(oAuthConfig.getSigninUri() + "/oauth/token"))
 				.body(BodyInserters.fromFormData(oAuthCredentials.asFormData()))
 				.retrieve()
 				.bodyToMono(OAuthTokens.class);
@@ -195,7 +195,7 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 		int totpPassword = googleAuthenticator.getTotpPassword(mfaSeed);
 		TotpCredentials totpCredentials = new TotpCredentials(jwtWithMfa.getJwt(), totpPassword);
 		return webClient.post()
-				.uri(asUri(oAuthConfig.getSigninUri() + "login"))
+				.uri(asUri(oAuthConfig.getSigninUri() + "/login"))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.body(BodyInserters.fromFormData(totpCredentials.asFormData()))
 				.exchange()
