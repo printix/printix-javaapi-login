@@ -107,6 +107,22 @@ public class TokenManagerImpl implements TokenManager {
 
 
 	@Override
+	public Mono<Void> wrapSyncCall(Runnable syncCall) {
+		Mono<Void> result = getCurrentTokens()
+				.flatMap(tokens -> {
+					Mono<Void> blockingWrapper = Mono.fromRunnable(() -> {
+						tokensForSynchronousCall.set(tokens);
+						syncCall.run();
+						tokensForSynchronousCall.remove();
+					});
+					blockingWrapper = blockingWrapper.subscribeOn(Schedulers.elastic());
+					return blockingWrapper;
+				});
+		return result;
+	}
+
+
+	@Override
 	public <T> Mono<T> wrapSyncCall(Callable<T> syncCall) {
 		Mono<T> result = getCurrentTokens()
 				.flatMap(tokens -> {

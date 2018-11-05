@@ -92,6 +92,9 @@ public interface TokenManager {
 	Context contextFor(String tenantHostName, UserCredentials userCredentials);
 
 
+	Mono<Void> wrapSyncCall(Runnable runnable);
+
+	
 	<T> Mono<T> wrapSyncCall(Callable<T> callable);
 
 
