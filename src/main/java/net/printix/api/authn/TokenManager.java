@@ -1,5 +1,7 @@
 package net.printix.api.authn;
 
+import java.util.concurrent.Callable;
+
 import net.printix.api.authn.dto.OAuthTokens;
 import net.printix.api.authn.dto.UserCredentials;
 import reactor.core.publisher.Mono;
@@ -40,7 +42,7 @@ public interface TokenManager {
 	 * @param user
 	 * @param action
 	 */
-//	void doAs(Object user, Runnable action);
+	//	void doAs(Object user, Runnable action);
 
 
 	/**
@@ -52,7 +54,7 @@ public interface TokenManager {
 	 * @param user
 	 * @param action
 	 */
-//	<V> V callAs(Object user, Callable<V> action);
+	//	<V> V callAs(Object user, Callable<V> action);
 
 
 	/**
@@ -88,6 +90,12 @@ public interface TokenManager {
 	 * @throws RuntimeException if invalid credentials are given or if login takes too long.
 	 */
 	Context contextFor(String tenantHostName, UserCredentials userCredentials);
+
+
+	<T> Mono<T> wrapSyncCall(Callable<T> callable);
+
+
+	OAuthTokens getTokensForSynchronousCall();
 
 
 }

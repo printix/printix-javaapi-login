@@ -2,6 +2,7 @@ package net.printix.api.authn.internal;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import net.printix.api.authn.TokenManager;
 import net.printix.api.authn.dto.OAuthTokens;
 import net.printix.api.authn.dto.UserCredentials;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 
 @Service
@@ -29,6 +31,8 @@ public class TokenManagerImpl implements TokenManager {
 	private AuthenticationClient authenticationClient;
 
 	private ConcurrentHashMap<Object, OAuthTokens> tokensPerUser = new ConcurrentHashMap<>();
+
+	private ThreadLocal<OAuthTokens> tokensForSynchronousCall = new ThreadLocal<>();
 
 
 	@Override
@@ -55,19 +59,19 @@ public class TokenManagerImpl implements TokenManager {
 	@Override
 	public Mono<OAuthTokens> getCurrentTokens() {
 		return Mono.subscriberContext()
-		.flatMap(context -> {
-			OAuthTokens tokens = context.get(OAuthTokens.class);
-			Mono<OAuthTokens> tokensMono = Mono.just(tokens);
-			if (tokens.isStillValid(1L)) {
-				return tokensMono;
-			} else {
-				log.trace("Token {} expired or about to expire. Refreshing.", tokens);
-				return tokensMono
-				.flatMap(t -> tokenRefresher.refresh(Mono.just(t)))
-				.flatMap(this::replaceCurrentTokens)
-				.map(ctx -> context.get(AuthContext.class).getTokens());
-			}
-		});
+				.flatMap(context -> {
+					OAuthTokens tokens = context.get(OAuthTokens.class);
+					Mono<OAuthTokens> tokensMono = Mono.just(tokens);
+					if (tokens.isStillValid(1L)) {
+						return tokensMono;
+					} else {
+						log.trace("Token {} expired or about to expire. Refreshing.", tokens);
+						return tokensMono
+								.flatMap(t -> tokenRefresher.refresh(Mono.just(t)))
+								.flatMap(this::replaceCurrentTokens)
+								.map(ctx -> context.get(AuthContext.class).getTokens());
+					}
+				});
 	}
 
 
@@ -94,11 +98,34 @@ public class TokenManagerImpl implements TokenManager {
 			return contextFor(userCredentials.getUsername());
 		} else {
 			return authenticationClient.signin(tenantHostName, userCredentials)
-			.map(oAuthTokens -> {
-				tokensPerUser.put(userCredentials.getUsername(), oAuthTokens);
-				return Context.of(OAuthTokens.class, oAuthTokens);
-			}).block(Duration.ofSeconds(30));
+					.map(oAuthTokens -> {
+						tokensPerUser.put(userCredentials.getUsername(), oAuthTokens);
+						return Context.of(OAuthTokens.class, oAuthTokens);
+					}).block(Duration.ofSeconds(30));
 		}
+	}
+
+
+	@Override
+	public <T> Mono<T> wrapSyncCall(Callable<T> syncCall) {
+		Mono<T> result = getCurrentTokens()
+				.flatMap(tokens -> {
+					Mono<T> blockingWrapper = Mono.fromCallable(() -> {
+						tokensForSynchronousCall.set(tokens);
+						T syncResult = syncCall.call();
+						tokensForSynchronousCall.remove();
+						return syncResult;
+					});
+					blockingWrapper = blockingWrapper.subscribeOn(Schedulers.elastic());
+					return blockingWrapper;
+				});
+		return result;
+	}
+
+
+	@Override
+	public OAuthTokens getTokensForSynchronousCall() {
+		return tokensForSynchronousCall.get();
 	}
 
 
