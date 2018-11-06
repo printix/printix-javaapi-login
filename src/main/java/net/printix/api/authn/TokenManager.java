@@ -34,30 +34,6 @@ public interface TokenManager {
 
 
 	/**
-	 * Perform given action with given user as current user.
-	 * 
-	 * OAuthTokens for given user must have been registered using {@linkplain #setUserToken(Object, OAuthTokens)} first.
-	 * OAuthTokens can be obtained using {@link AuthenticationClient#signin(String, net.printix.api.authn.dto.UserCredentials)}.
-	 *
-	 * @param user
-	 * @param action
-	 */
-	//	void doAs(Object user, Runnable action);
-
-
-	/**
-	 * Perform given action with given user as current user and returns a result.
-	 * 
-	 * OAuthTokens for given user must have been registered using {@linkplain #setUserToken(Object, OAuthTokens)} first.
-	 * OAuthTokens can be obtained using {@link AuthenticationClient#signin(String, net.printix.api.authn.dto.UserCredentials)}.
-	 *
-	 * @param user
-	 * @param action
-	 */
-	//	<V> V callAs(Object user, Callable<V> action);
-
-
-	/**
 	 * Checks if tokens have been registered for given user.
 	 * 
 	 * @param user
