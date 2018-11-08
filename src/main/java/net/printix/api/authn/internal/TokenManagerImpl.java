@@ -112,6 +112,7 @@ public class TokenManagerImpl implements TokenManager {
 				.flatMap(tokens -> {
 					Mono<Void> blockingWrapper = Mono.fromRunnable(() -> {
 						tokensForSynchronousCall.set(tokens);
+						log.trace("Tokens for sync run {} set on thread {}. ", tokens, Thread.currentThread());
 						syncCall.run();
 						tokensForSynchronousCall.remove();
 					});
@@ -128,6 +129,7 @@ public class TokenManagerImpl implements TokenManager {
 				.flatMap(tokens -> {
 					Mono<T> blockingWrapper = Mono.fromCallable(() -> {
 						tokensForSynchronousCall.set(tokens);
+						log.trace("Tokens for sync call {} set on thread {}. ", tokens, Thread.currentThread());
 						T syncResult = syncCall.call();
 						tokensForSynchronousCall.remove();
 						return syncResult;
