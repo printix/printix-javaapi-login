@@ -97,6 +97,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
+			<version>3.12.1</version> <!-- spring boot 2.0.6 managed version (3.9.1) fails on java 11 -->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
