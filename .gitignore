@@ -6,3 +6,4 @@
 /.project
 *.iml
 application-local.yml
+/.apt_generated_tests/
