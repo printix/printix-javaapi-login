@@ -7,3 +7,4 @@
 *.iml
 application-local.yml
 /.apt_generated_tests/
+/.sts4-cache/
