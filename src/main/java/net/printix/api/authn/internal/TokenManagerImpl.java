@@ -38,7 +38,8 @@ public class TokenManagerImpl implements TokenManager {
 	@Override
 	public void setUserToken(Object user, OAuthTokens oAuthTokens) {
 		if (tokensPerUser.putIfAbsent(user, oAuthTokens) != null) {
-			log.warn("Credentials already registered for user {}.", user, new Exception("Stacktrace:"));
+			log.warn("Credentials already registered for user {}.");
+			log.trace("called from", new Exception("Stacktrace:"));
 		}
 		log.trace("Credentials for user {} registered.", user);
 	}
