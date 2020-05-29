@@ -1,12 +1,18 @@
 package net.printix.api.authn.internal;
 
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -15,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse.Headers;
@@ -56,6 +64,8 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 	private final WebClient webClient;
 	private final WebClient nonRedirectingWebClient; // "non-redirecting" because we need to intercept redirects.
 
+	private final Encoder base64Encoder = Base64.getEncoder();
+
 
 	public AuthenticationClientImpl(WebClient.Builder webClientBuilder) {
 		// TODO Spring 5.1 should support per-webClient configuration of whether redirects should be followed or not. Until then both clients do NOT follow redirects.
@@ -85,6 +95,34 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 					}
 				})
 				.flatMap(this::getOauthCredentials);
+	}
+
+
+	@Override
+	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode) {
+		return signinViaIdCode(tenantId, printerId, idCode, null);
+	}
+
+
+	@Override
+	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode, String pincode) {
+		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+		request.add("grant_type", "password");
+		request.add("client_id", oAuthConfig.getClientId());
+		request.add("client_secret", oAuthConfig.getClientSecret());
+		request.add("secret", base64Encoder.encodeToString(idCode.getBytes()));
+		if (pincode != null && !pincode.isEmpty()) {
+			request.add("pincode", pincode);
+		}
+
+		return nonRedirectingWebClient.post()
+				.uri("https://auth." + printixDomain + "/oauth/token/tenants/{tenant}/printers/{printer}/usersecret",
+						tenantId, printerId)
+				.contentType(APPLICATION_FORM_URLENCODED)
+				.body(BodyInserters.fromFormData(request))
+				.accept(APPLICATION_JSON)
+				.exchange()
+				.flatMap(cr -> cr.bodyToMono(OAuthTokens.class));
 	}
 
 
