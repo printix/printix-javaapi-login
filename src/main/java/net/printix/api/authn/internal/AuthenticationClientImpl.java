@@ -99,18 +99,21 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 
 
 	@Override
-	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode) {
-		return signinViaIdCode(tenantId, printerId, idCode, null);
+	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode) {
+		return signinViaIdCode(tenantId, printerId, authContextId, idCode, null);
 	}
 
 
 	@Override
-	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode, String pincode) {
+	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode,
+			String pincode) {
+
 		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
 		request.add("grant_type", "password");
 		request.add("client_id", oAuthConfig.getClientId());
 		request.add("client_secret", oAuthConfig.getClientSecret());
 		request.add("secret", base64Encoder.encodeToString(idCode.getBytes()));
+		request.add("authContextId", authContextId);
 		if (pincode != null && !pincode.isEmpty()) {
 			request.add("pincode", pincode);
 		}

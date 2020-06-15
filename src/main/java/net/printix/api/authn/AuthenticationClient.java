@@ -20,24 +20,27 @@ public interface AuthenticationClient {
 	/**
 	 * Signin to printix via ID code.
 	 *
-	 * @param tenantId  The ID of the tenant to sign into.
-	 * @param printerId The ID of the printer to sign into using the ID code.
-	 * @param idCode    The ID code to use to obtain tokens.
+	 * @param tenantId      The ID of the tenant to sign into.
+	 * @param printerId     The ID of the printer to sign into using the ID code.
+	 * @param authContextId The ID of an authentication context on a printer.
+	 * @param idCode        The ID code to use to obtain tokens.
 	 *
 	 * @return Mono providing the tokens.
 	 */
-	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode);
+	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode);
 
 	/**
 	 * Signin to printix via ID code and pincode.
 	 *
-	 * @param tenantId  The ID of the tenant to sign into.
-	 * @param printerId The ID of the printer to sign into using the ID code.
-	 * @param idCode    The ID code to use to obtain tokens.
-	 * @param pincode   The pincode of the ID code.
+	 * @param tenantId      The ID of the tenant to sign into.
+	 * @param printerId     The ID of the printer to sign into using the ID code.
+	 * @param authContextId The ID of an authentication context on a printer.
+	 * @param idCode        The ID code to use to obtain tokens.
+	 * @param pincode       The pincode of the ID code.
 	 *
 	 * @return Mono providing the tokens.
 	 */
-	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String idCode, String pincode);
+	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode,
+			String pincode);
 
 }
