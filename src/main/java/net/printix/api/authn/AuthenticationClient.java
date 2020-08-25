@@ -3,6 +3,7 @@ package net.printix.api.authn;
 import java.util.UUID;
 
 import net.printix.api.authn.dto.OAuthTokens;
+import net.printix.api.authn.dto.OAuthTokensForIdCode;
 import net.printix.api.authn.dto.UserCredentials;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +28,7 @@ public interface AuthenticationClient {
 	 *
 	 * @return Mono providing the tokens.
 	 */
-	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode);
+	Mono<OAuthTokensForIdCode> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode);
 
 	/**
 	 * Signin to printix via ID code and pincode.
@@ -40,7 +41,6 @@ public interface AuthenticationClient {
 	 *
 	 * @return Mono providing the tokens.
 	 */
-	Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode,
-			String pincode);
+	Mono<OAuthTokensForIdCode> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode, String pincode);
 
 }

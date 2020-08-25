@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.printix.api.authn.AuthenticationClient;
 import net.printix.api.authn.config.OAuthConfig;
 import net.printix.api.authn.dto.OAuthTokens;
+import net.printix.api.authn.dto.OAuthTokensForIdCode;
 import net.printix.api.authn.dto.UserCredentials;
 import net.printix.api.authn.dto.internal.Jwt;
 import net.printix.api.authn.dto.internal.OAuthCredentials;
@@ -99,13 +100,13 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 
 
 	@Override
-	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode) {
+	public Mono<OAuthTokensForIdCode> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode) {
 		return signinViaIdCode(tenantId, printerId, authContextId, idCode, null);
 	}
 
 
 	@Override
-	public Mono<OAuthTokens> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode,
+	public Mono<OAuthTokensForIdCode> signinViaIdCode(UUID tenantId, UUID printerId, String authContextId, String idCode,
 			String pincode) {
 
 		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
@@ -125,7 +126,7 @@ public class AuthenticationClientImpl implements AuthenticationClient {
 				.body(BodyInserters.fromFormData(request))
 				.accept(APPLICATION_JSON)
 				.exchange()
-				.flatMap(cr -> cr.bodyToMono(OAuthTokens.class));
+				.flatMap(cr -> cr.bodyToMono(OAuthTokensForIdCode.class));
 	}
 
 
